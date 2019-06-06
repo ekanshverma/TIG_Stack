@@ -1,0 +1,42 @@
+version: "3"
+networks:
+  tignw:
+
+services:
+   influxdb:
+      image: influxdb:1.6.3
+      container_name: influxdb
+      hostname: influxdb
+      ports:
+        - "8086:8086"
+        - "8083:8083"
+      networks:
+        - tignw
+      restart: always
+
+   grafana:
+      image: grafana/grafana:4.3.2
+      container_name: ekanshgrafana
+      ports:
+        - "3000:3000"
+      depends_on:
+        - "telegraf"
+      links:
+        - influxdb
+      networks:
+        - tignw
+      restart: always
+
+   telegraf:
+     image: telegraf
+     container_name: telegraf
+     depends_on:
+      - "influxdb"
+     links:
+      - influxdb
+     networks:
+      - tignw
+     volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+     restart: always
+     
